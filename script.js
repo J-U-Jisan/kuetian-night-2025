@@ -1,5 +1,9 @@
-var script_url = "https://script.google.com/macros/s/AKfycby0P76ZWBQjpykySNHVVwPhq_6RgrACCUz6BkDb5Vjn_TdEPiPVo3SdjGHyanuvS6Ncpg/exec";
+var script_url = "https://script.google.com/macros/s/AKfycbw3toDhGirJggkL20c6_4hv0OxvIeUE2uOtzCNIGzLw-ClaH4W_V2hsGd81eufLBKKEPQ/exec";
 
+const KUETIAN_FEE = 1500;
+const SPOUSE_FEE = 1200;
+const KID_FEE = 500;
+const DRIVER_MAID_FEE = 500;
 let payable = 0;
 let personPay = 0;
 let spousePay = 0;
@@ -10,7 +14,7 @@ let netPayable = 0;
 let accountNo = '';
 let charge = 0;
 var emailcheck = false;
-const applicationDeadline = new Date(2025, 2, 20, 23, 59); // 20th March 2025, 11:59 PM
+const applicationDeadline = new Date(2025, 11, 10, 23, 59); // 10th December 2025, 11:59 PM
 
 // Make an AJAX call to Google Script
 function insert_value() {
@@ -60,7 +64,37 @@ function insert_value() {
     }
 }
 
+function populateBatchDropdown() {
+    const batchDropdown = document.getElementById('batch');
+    const startYear = 1972; // Starting batch year
+    const currentYear = new Date().getFullYear(); // Current year
+
+    for (let year = startYear; year <currentYear; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        batchDropdown.appendChild(option);
+    }
+}
+
+function populateDepartmentDropdown() {
+    const departmentDropdown = document.getElementById('department');
+    const departments = [
+        "EEE", "CSE", "MSE", "ECE", "BME", "ME", "IEM", "ESE", 
+        "LE", "MTE", "CHE", "TE", "CE", "BECM", "ARCH", "URP"
+    ];
+
+    departments.forEach(department => {
+        const option = document.createElement('option');
+        option.value = department;
+        option.textContent = department;
+        departmentDropdown.appendChild(option);
+    });
+}
+
 function onLoad() {
+    populateBatchDropdown();
+    populateDepartmentDropdown();
     showApplicationDeadline();
     $("#nonKuetianSection").hide();
     $('#numberOfKidsDiv').hide();
@@ -86,7 +120,7 @@ function handleBatch() {
     if (batch) {
         $("#nonKuetianSection").show();
         batch = parseInt(batch);
-        personPay = 500
+        personPay = KUETIAN_FEE
     }
     
     paymentCalculator();
@@ -96,7 +130,7 @@ function handleSpouse(){
     let spouse = $("input[name=spouse]:checked").val();
 
     if (spouse === 'Yes')
-        spousePay = personPay;
+        spousePay = SPOUSE_FEE;
     else
         spousePay = 0;
     
@@ -107,7 +141,7 @@ function handleNumberOfKids(){
     let kids = $('input[name=kids]:checked').val();
     let number_of_kids = $('#numberOfKids').val();
     if(kids === 'Yes'){
-        kidsPay = (number_of_kids*personPay);
+        kidsPay = (number_of_kids*KID_FEE);
     }
     else{
         kidsPay = 0;
@@ -133,7 +167,7 @@ function handleDriver() {
     
     console.log(driver)
     if (driver === 'Yes')
-        driverPay = personPay;
+        driverPay = DRIVER_MAID_FEE;
     else 
         driverPay = 0;
 
@@ -144,7 +178,7 @@ function handleMaid() {
     const maid = $("input[name=maid]:checked").val();
     console.log(maid);
     if (maid === 'Yes')
-        maidPay = personPay;
+        maidPay = DRIVER_MAID_FEE;
     else 
         maidPay = 0;
 
@@ -186,8 +220,6 @@ function handleNext() {
 
 function handlePaymentMode(e) {
     let paymentMode = e.getAttribute('value');
-    
-    console.log('account no', accountNo);
 
     if (paymentMode === 'Bkash') {
         charge = 15;
